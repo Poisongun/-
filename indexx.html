@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Smart Task Planner | AI Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #eef2f5 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #2c3e66;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 1rem;
+      border-radius: 40px;
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1F2B4E, #2a3f6e);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .sub {
+      color: #4a5b6e;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* карточки */
+    .card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(2px);
+      border-radius: 32px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.02);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.7);
+      transition: all 0.2s;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1e2b3c;
+    }
+
+    /* форма */
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-field {
+      flex: 4;
+      min-width: 200px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 28px;
+      font-size: 1rem;
+      background: white;
+      transition: 0.2s;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #6c8fb3;
+      box-shadow: 0 0 0 3px rgba(108,143,179,0.2);
+    }
+
+    button {
+      background: #1f3a5f;
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 40px;
+      font-weight: 600;
+      color: white;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    button:hover {
+      background: #0f2a4a;
+      transform: translateY(-2px);
+    }
+
+    /* таблица задач */
+    .tasks-header {
+      display: grid;
+      grid-template-columns: 40px 3fr 110px 100px 60px;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+      background: #e9edf2;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .task-item {
+      display: grid;
+      grid-template-columns: 40px 3fr 110px 100px 60px;
+      gap: 0.8rem;
+      align-items: center;
+      background: white;
+      padding: 1rem;
+      margin-bottom: 0.6rem;
+      border-radius: 60px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      transition: 0.1s;
+      border: 1px solid #eef2f8;
+    }
+
+    .task-item.completed {
+      opacity: 0.65;
+      background: #f9fafb;
+      text-decoration: line-through;
+    }
+
+    .task-text {
+      font-weight: 500;
+      word-break: break-word;
+    }
+
+    .category-badge {
+      background: #eef2ff;
+      padding: 0.2rem 0.8rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+      width: fit-content;
+    }
+
+    .time-badge {
+      font-family: monospace;
+      font-weight: 600;
+      background: #f1f3f5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 30px;
+      text-align: center;
+    }
+
+    .delete-btn {
+      background: none;
+      color: #b91c1c;
+      box-shadow: none;
+      padding: 0.3rem 0.8rem;
+      font-size: 1.2rem;
+    }
+
+    .delete-btn:hover {
+      background: #fee2e2;
+      transform: none;
+      color: #991b1b;
+    }
+
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      accent-color: #1f3a5f;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 2rem;
+      color: #6c7a8a;
+    }
+
+    @media (max-width: 700px) {
+      .tasks-header {
+        display: none;
+      }
+      .task-item {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+        border-radius: 28px;
+        padding: 1rem;
+      }
+      .task-item .category-badge, .task-item .time-badge {
+        width: auto;
+        display: inline-block;
+      }
+      .delete-btn {
+        justify-self: start;
+        width: fit-content;
+      }
+      .input-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">🤖 AI Assistant</div>
+    <h1>🧠 Умный планировщик задач</h1>
+    <div class="sub">ИИ автоматически определяет категорию и время выполнения.</div>
+  </div>
+
+  <!-- карточка добавления -->
+  <div class="card">
+    <div class="card-title">📝 Новая задача</div>
+    <div class="input-group">
+      <div class="input-field">
+        <textarea id="taskDescription" rows="2" placeholder="Например: Купить продукты, Пробежка в парке, Подготовить отчет ..."></textarea>
+      </div>
+      <button id="addTaskBtn">✨ Добавить + ИИ-анализ</button>
+    </div>
+  </div>
+
+  <!-- список задач -->
+  <div class="card" style="padding-bottom: 0.8rem;">
+    <div class="card-title">📋 Мои задачи <span id="taskCounter">(0)</span></div>
+    <div class="tasks-header">
+      <span>✓</span> <span>Задача</span> <span>Категория</span> <span>⏱️ Время</span> <span></span>
+    </div>
+    <div id="tasksContainer">
+      <div class="empty-message">✨ Добавьте задачу, и ИИ сам определит категорию и время.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Имитация AI (категория + оценка времени) ----------
+  // 5 строго запрограммированных задач (не показываются пользователю)
+  const PREDEFINED_TASKS = [
+    { pattern: "Купить продукты", category: "личное", time: 15 },
+    { pattern: "Пробежка в парке", category: "здоровье", time: 30 },
+    { pattern: "Изучить React", category: "обучение", time: 90 },
+    { pattern: "Подготовить отчет по продажам", category: "работа", time: 45 },
+    { pattern: "Починить кран на кухне", category: "личное", time: 60 }
+  ];
+
+  // Ключевые слова для гибкой имитации (расширенная логика)
+  const KEYWORD_RULES = [
+    { keywords: ["купить", "магазин", "продукты", "хлеб", "молоко"], category: "личное", defaultTime: 20, timeMap: { "продукты": 15, "купить": 15 } },
+    { keywords: ["бег", "пробежка", "тренировка", "фитнес", "йога", "спорт"], category: "здоровье", defaultTime: 35, timeMap: { "пробежка": 30, "тренировка": 45 } },
+    { keywords: ["учить", "изучать", "курс", "лекция", "react", "python", "js", "алгоритмы"], category: "обучение", defaultTime: 70, timeMap: { "react": 90, "python": 80, "алгоритмы": 60 } },
+    { keywords: ["отчет", "презентация", "совещание", "работа", "клиент", "дедлайн", "продажи"], category: "работа", defaultTime: 45, timeMap: { "отчет": 45, "презентация": 50, "дедлайн": 40 } },
+    { keywords: ["ремонт", "починить", "кран", "сантехник", "розетка", "сломалась"], category: "личное", defaultTime: 55, timeMap: { "кран": 60, "ремонт": 70 } }
+  ];
+
+  // Основная функция имитации "ИИ"
+  function smartAISimulate(description) {
+    if (!description || typeof description !== 'string') {
+      return { category: "другое", estimatedTime: 20 };
+    }
+    const trimmed = description.trim();
+    const lowerDesc = trimmed.toLowerCase();
+    // 1. Точное совпадение с заскриптованными 5 задачами (регистронезависимо)
+    for (let task of PREDEFINED_TASKS) {
+      if (trimmed === task.pattern || lowerDesc === task.pattern.toLowerCase()) {
+        return { category: task.category, estimatedTime: task.time };
+      }
+    }
+    // 2. Расширенный поиск по ключевым словам
+    for (let rule of KEYWORD_RULES) {
+      for (let kw of rule.keywords) {
+        if (lowerDesc.includes(kw)) {
+          let time = rule.defaultTime;
+          for (let [key, val] of Object.entries(rule.timeMap || {})) {
+            if (lowerDesc.includes(key)) {
+              time = val;
+              break;
+            }
+          }
+          return { category: rule.category, estimatedTime: time };
+        }
+      }
+    }
+    // 3. Служебные слова
+    if (lowerDesc.includes("здоровье") || lowerDesc.includes("медитация")) return { category: "здоровье", estimatedTime: 25 };
+    if (lowerDesc.includes("книга") || lowerDesc.includes("читать")) return { category: "обучение", estimatedTime: 50 };
+    // финальный fallback
+    return { category: "другое", estimatedTime: 20 };
+  }
+
+  // ------------------- Управление задачами (localStorage) -------------------
+  let tasks = [];
+
+  function loadTasks() {
+    const stored = localStorage.getItem("smart_tasks");
+    if (stored) {
+      try {
+        tasks = JSON.parse(stored);
+      } catch(e) { tasks = []; }
+    }
+    if (!tasks.length) tasks = [];
+    renderTasks();
+  }
+
+  function saveTasks() {
+    localStorage.setItem("smart_tasks", JSON.stringify(tasks));
+    renderTasks();
+  }
+
+  function addTask(text) {
+    if (!text || text.trim() === "") {
+      alert("Пожалуйста, введите описание задачи");
+      return false;
+    }
+    const cleanText = text.trim();
+    const aiResult = smartAISimulate(cleanText);
+    const newTask = {
+      id: Date.now(),
+      text: cleanText,
+      category: aiResult.category,
+      estimatedTime: aiResult.estimatedTime,
+      completed: false,
+    };
+    tasks.unshift(newTask);
+    saveTasks();
+    return true;
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks();
+  }
+
+  function toggleComplete(id) {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+      task.completed = !task.completed;
+      saveTasks();
+    }
+  }
+
+  function renderTasks() {
+    const container = document.getElementById("tasksContainer");
+    const counterSpan = document.getElementById("taskCounter");
+    if (!container) return;
+
+    if (tasks.length === 0) {
+      container.innerHTML = `<div class="empty-message">✨ Нет задач. Добавьте новую задачу, и ИИ подскажет категорию и время.</div>`;
+      if(counterSpan) counterSpan.innerText = "(0)";
+      return;
+    }
+
+    let html = '';
+    tasks.forEach(task => {
+      const completedClass = task.completed ? 'completed' : '';
+      html += `
+        <div class="task-item ${completedClass}" data-id="${task.id}">
+          <div><input type="checkbox" class="checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}></div>
+          <div class="task-text">${escapeHtml(task.text)}</div>
+          <div><span class="category-badge">${escapeHtml(task.category)}</span></div>
+          <div><span class="time-badge">${task.estimatedTime} мин</span></div>
+          <div><button class="delete-btn" data-id="${task.id}">🗑️</button></div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+    if(counterSpan) counterSpan.innerText = `(${tasks.length})`;
+
+    document.querySelectorAll('.checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const id = parseInt(e.target.getAttribute('data-id'));
+        toggleComplete(id);
+      });
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(btn.getAttribute('data-id'));
+        deleteTask(id);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  // Инициализация событий и загрузка
+  document.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+
+    const addBtn = document.getElementById("addTaskBtn");
+    const textarea = document.getElementById("taskDescription");
+    if (addBtn && textarea) {
+      addBtn.addEventListener('click', () => {
+        if (addTask(textarea.value)) {
+          textarea.value = "";
+        }
+      });
+      textarea.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          addBtn.click();
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>
